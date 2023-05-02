@@ -2,56 +2,160 @@
 #include<fstream>
 #include<string.h>
 using namespace std;
-    class supermarket{
+class supermarket{
         public:
+        //data of the product.
         int id;
         double price;
         int expirydate;
         char productname[20];
-void writerecord()
-{
-     ofstream out;
-    out.open("supermarket.txt",ios::app);
-    if(out.is_open()){
-   supermarket s;
-    int j;
-    do{
-    cout<<"\t\tEnter id\n\n"<<endl;
-    cin>>s.id;
-     cout<<"\t\tEnter productname\n\n"<<endl;
-    cin>>s.productname;
-     cout<<"\t\tEnter price\n\n"<<endl;
-    cin>>s.price;
-    cout<<"\t\tEnter expirydate\n\n"<<endl;
-    cin>>s.expirydate;
-    out.write((char*)&s,sizeof(s));
-    cout<<"\t\t\t Enter 0 to exit :: Enter 1 to add\n\n";
-    cin>>j;
+        //data user
+        char name[10];
+        int phone;
+        int num_product;
+        char prod_order[20];
+void add_items() {
+    ofstream out("supermarket.txt", ios::app);
+    if (!out) {
+        cout << "File not found.\n";
+        return;
     }
-    while(j==1);
+
+    supermarket s;
+    string newProductName;
+    int j = 1;
+
+    while (j == 1) {
+        cout << "\n\n\t\tEnter product name: ";
+        cin >> newProductName;
+
+        ifstream in("supermarket.txt");
+        string line;
+        bool nameExists = false;
+
+        while (getline(in, line)) {
+            if (line.find(newProductName) != string::npos) {
+                nameExists = true;
+                break;
+            }
+        }
+
+        if (nameExists) {
+            cout << "\n\n\t\t Product name already exists. Please enter a new name.\n";
+            continue;
+        }
+
+        strcpy(s.productname, newProductName.c_str());
+
+        cout << "\n\n\t\tEnter price: ";
+        cin >> s.price;
+        cout << "\n\n\t\tEnter expiry date: ";
+        cin >> s.expirydate;
+
+        out.write((char*)&s, sizeof(s));
+        cout << "\n\n\t\tProduct added successfully.\n";
+
+        cout << "\n\n\t\tEnter 0 to exit, or 1 to add another product: ";
+        cin >> j;
+    }
+
     out.close();
-    }else{
-        cout<<"\t\t\t !!!!!!!!!!! cant found file  !!!!!!!!!!!\n\n"<<endl;
-     }
-  }
-  void readrecord()
+}
+
+void delrcord()
+{
+    ifstream in("supermarket.txt", ios::in);
+    ofstream out("temp.txt", ios::out);
+    if (!in.is_open() || !out.is_open()) {
+        cout << "Error: could not open files\n";
+        return;
+    }
+
+    cout << "\t\t\tEnter the name of the item to delete: ";
+    string name;
+    cin >> name;
+
+    bool found = false;
+    supermarket s;
+    while (in.read((char*)&s, sizeof(s))) {
+        if (s.productname != name) {
+            out.write((char*)&s, sizeof(s));
+        } else {
+            found = true;
+        }
+    }
+
+    in.close();
+    out.close();
+
+    if (remove("supermarket.txt") != 0) {
+        cout << "Error deleting file\n";
+        return;
+    }
+    if (rename("temp.txt", "supermarket.txt") != 0) {
+        cout << "Error renaming file\n";
+        return;
+    }
+
+    if (found) {
+        cout << "\t\t\tItem (" << name << ") has been deleted\n";
+    } else {
+        cout << "\t\t\tItem (" << name << ") not found\n";
+    }
+}
+
+void show_items()           // to view products in the super market (Read fun).
   {
-      supermarket s;
-      ifstream in("supermarket.txt",ios::in);
-      if(in.is_open())
-      {
-          cout<<"\tid\tname\tprice\texpirydate\n\n"<<endl;
-          while(!in.eof()){
+    int id=0;
+    supermarket s;                 //object from the class
+    ifstream in("supermarket.txt",ios::in);
+    if(in.is_open())
+      {     cout<<"\tid\tname\tprice\texpirydate\n\n"<<endl;
+            while(!in.eof())
+            {
             in.read((char*)&s,sizeof(s));
-            cout<<"\t"<<s.id<<"\t"<<s.productname<<"\t"<<s.price<<"\t"<<s.expirydate<<endl;
-          }
+            if(s.id!=id){
+            cout<<"\t"<<s.id<<"\t"<<s.productname<<"\t"<<s.price<<"\t"<<s.expirydate<<endl; id=s.id;}
+            }
+
           in.close();
+      }
+         else
+         {
+            cout<<"\t\t\t !!!!!!!!!!! cant found file  !!!!!!!!!!!\n\n"<<endl;
+         }
+
+   }
+   void show_orders() // to view orders (Read fun)
+   {
+      int j;
+      int phone=0;
+      supermarket b;   //object
+      ifstream in("user_data.txt",ios::in);
+      if(in.is_open())
+      {     do
+
+      {
+      cout<<"\tproduct Name\t\tmobile phone\ttotal number product\n\n"<<endl;
+            while(!in.eof())
+            {
+            in.read((char*)&b,sizeof(b));
+            if(b.phone!=phone){
+      cout<<"\t"<<b.prod_order<<"\t"<<b.name<<"\t"<<"\t"<<b.phone<<"\t\t"<<b.num_product<<endl; phone=b.phone;}
+            }
+            cout<<"\t\t\t Enter 0 to Exit\n\n";
+            cin>>j;
 
       }
-          else{
-        cout<<"\t\t\t !!!!!!!!!!! cant found file  !!!!!!!!!!!\n\n"<<endl;
-     }
+          while(j==1);
+          in.close();
       }
+         else
+         {
+            cout<<"\t\t\t !!!!!!!!!!! cant found file  !!!!!!!!!!!\n\n"<<endl;
+         }
+   }
+
 void searchitem()
 {
     char str[20];
@@ -71,8 +175,6 @@ void searchitem()
           }
           }
           in.close();
-          if(strcmp(s.productname,str)!=0)
-            cout<<"not foundddd"<<endl;
 
       }
           else{
@@ -80,160 +182,267 @@ void searchitem()
           }
 
 }
-void delrcord()
-{
-    ifstream in("supermarket.txt",ios::in);
-    ofstream out("temp.txt",ios::out);
-    if(in.is_open())
-      {
-          supermarket s;
-          char str[20];
-          cout<<"delete"<<endl;
-          cin>>str;
-          while(in.read((char*)&s,sizeof(s)))
-            {
-                if(strcmp(str,s.productname)!=0)
-                {
-                    out.write((char*)&s,sizeof(s));
-                }
-                in.close();
-                out.close();
-                remove("supermarket.txt");
-                rename("temp.txt","supermarket.txt");
 
-            }
-            readrecord();
-      }
-}
-void filelength()
-{
-fstream y("supermarket.txt",ios::in);
-    if(y.is_open())
-    {
-        y.seekg(0,ios::end);
-        cout<<"file length is "<<y.tellg();
-
-    }
-    y.close();
-
-}
-void copyfile()
-{
-    char ch;
-    fstream in("supermarket.txt",ios::in);
-    fstream out("supermarket2.txt",ios::out);
-    if(in.is_open())
-    {
-        while(in.get(ch))
-            out.put(ch);
-        in.close();
-        out.close();
-    }
-
-}
-void streamstate()
-{
-    fstream in("supermarket.txt",ios::in);
-    cout<<in.fail()<<endl;
-    cout<<in.eof()<<endl;
-    cout<<in.good()<<endl;
-    char q;
-    in.get(q);
-    cout<<in.fail()<<endl;
-    cout<<in.eof()<<endl;
-    cout<<in.good()<<endl;
-    in.clear();
-    cout<<in.fail()<<endl;
-    cout<<in.eof()<<endl;
-    cout<<in.good()<<endl;
-}
-void update()
-{
+void update() {
     supermarket s;
-    fstream f("supermarket.txt",ios::in | ios::out);
-    if(f.is_open()){
+    fstream in("supermarket.txt", ios::in | ios::out);
     char str[20];
-    cout<<"enter product name to update"<<endl;
-    cin>>str;
+    cout << "\t\t\tEnter product name :\n\n " << endl;
+    cin >> str;
+
+    if (!in.is_open()) {
+        cout << "\t\t\tCannot open file" << endl;
+        return;
+    }
+
     bool found = false;
-    while(!f.eof())
-    {
-        f.read((char*)&s,sizeof(s));
-        if(strcmp(str,s.productname)==0)
-        {
-            cout<<"enter new name to update"<<str<<" "<<endl;
-            cin>>s.productname;
-            int curpos = f.tellg();
-            int supermarketsize = sizeof(s);
-            f.seekp(curpos-supermarketsize,ios::beg);
-            f.write((char*)&s,sizeof(s));
+    while (in.read((char*)&s, sizeof(s))) {
+        if (strcmp(s.productname, str) == 0) {
+            cout << "\t\t\tEnter the new price\n\n"<<endl;
+            cin >> s.price ;
+            cout<< "\t\t\t Enter the new expirydate \n\n"<< endl;
+            cin >> s.expirydate;
+            cout<<"t\t\t\t!!!!!!done !!!!!!!\n\n"<<endl;
+            int curPos = in.tellg();
+            int stuSize = sizeof(s);
+            in.seekg(curPos - stuSize, ios::beg);
+            in.write((char*)&s, sizeof(s));
             found = true;
             break;
         }
     }
-    f.close();
-    if(!found)
-        cout<<"product not exist"<<endl;
 
+    if (!found) {
+        cout << "\tProduct not found" << endl;
+    }
+
+    in.close();
 }
+
+
+void order(){
+	fstream f1,f2;
+	supermarket s , b;
+	f1.open("user_data.txt",ios::out|ios::in|ios::app);
+	f2.open("supermarket.txt",ios::in);
+		cout<<" Enter product Name : ";   //enter user data
+		cin>>b.prod_order;
+		cout<<" your Name : ";
+		cin>>b.name;
+		cout<<" mobile phone : ";
+		cin>>b.phone;
+		cout<<" total number product  : ";
+		cin>>b.num_product;
+		f1.write((char*)&b,sizeof(b));
+		cout<<" _________________________________________________\n";
+
+  /*************************************************************/
+
+	int id=0;
+	int flag=0;
+	string str=b.prod_order;
+	while(!f1.eof() || !f2.eof())             //view user data
+    {
+		f1.read((char*)&b,sizeof(b));
+		f2.read((char*)&s,sizeof(s));
+		if(s.id != id )
+        {
+	    	if(s.productname == str )
+        {
+            cout<<"\n\tReservation sucessful \n";
+		   	cout<<"\n\tName : "<<b.name
+		   	<<"\n\tNumber phone : "<<b.phone
+		   	<<"\n\tproduct code : "<<s.id
+		   	<<"\n\tproduct Name : "<<s.productname
+		   	<<"\n\tThe  Price of "<< s.productname<<" : " <<s.price
+		   	<<"\n\tTotal order : "<<b.num_product
+		   	<<"\n\tTotal price : "<<(s.price)*(b.num_product)<<" EGP"<<"\n";
+				cout<<"____________________________________________________\n";
+		  	   flag=1;
+	      }
+	      id=s.id;
+	   }
+	}
+	if(flag==0)
+    {
+		cout<<"\n\tthis order not found..!\n";
+		cout<<" _________________________________________________\n";
+	}
+	/****************************************************************/
+	f1.close();
+	f2.close();
 }
-   };
+};
 int main()
 {
-  supermarket x;
+    supermarket x;
     int y;
-    do{
+    int f;
+    int k , p;
+    cout<<"\n\t\t===============SuperMarket================\n\n"<<endl;
+    cout<<"\t\t\t1_Client"<<"\n\n"<<"\t\t\t2_Seller\n\n"<<"\t\t______________chosse 1 or 2______________\n\n"<<endl;
+    cin>>f;
+    if(f==2)
+    {
+        cout<<"\t\t\tEnter password \n\n";
+        cin>>k;
+        if(k==123)
+        do
+    {
+    cout<<"\n\t\t===============SuperMarket================\n\n"<<endl;
+    cout<<"\t\t\tMAIN MENU\n\n"<<endl;
+    cout<<"\t\t\t 1-Show all items\n\n"<<endl;
+    cout<<"\t\t\t 2-Add new item\n\n"<<endl;
+    cout<<"\t\t\t 3-Search for item\n\n"<<endl;
+    cout<<"\t\t\t 4- Show orders\n\n"<<endl;
+    cout<<"\t\t\t 5-delete\n\n"<<endl;
+    cout<<"\t\t\t 6-update\n\n"<<endl;
+    cout<<"\t\t\t 0-exit\n\n"<<endl;
+    cout<<"\t\t\t**chosse from ((0 to 5)**\n\n"<<endl;
+    cin>>y;
+    switch(y){
+    case 1:
+              x.show_items();
+              cout<<"\n\n\t\t\tPress (0) Exit \n"
+	  			  <<"\t\t\tPress (1) Return to the menu\n";
+
+	  			   int p;   cin>>p;
+	  		  cout<<" _________________________________________________\n";
+	  		    	if(p==0){
+	  		    		cout<<"\t\t\tExit!\n";
+							return 0;
+						}
+	  		    	else{}
+        break;
+    case 2:
+              x.add_items();
+        break;
+    case 3:
+              x.searchitem();
+              cout<<"__Press (0) Exit \n"
+	  			  <<"__Press (1) Return\n";
+
+	  			     cin>>p;
+	  		  cout<<" _________________________________________________\n";
+	  		    	if(p==0){
+	  		    		cout<<"\t\t\tThank you !\n";
+							return 0;
+						}
+	  		    	else{}
+
+        break;
+    case 4:
+              x.show_orders();
+              cout<<"\n\t\t\tPress (0) Exit \n"
+	  			  <<"\t\t\tPress (1) Return\n\n";
+
+	  			      cin>>p;
+	  		  cout<<" _________________________________________________\n";
+	  		    	if(p==0){
+	  		    		cout<<"\t\t\tThank you !\n";
+							return 0;
+						}
+	  		    	else{}
+       break;
+    case 5:
+                x.delrcord();
+                cout<<"\n\t\t\tPress (0) Exit \n"
+	  			  <<"\t\t\tPress (1) Return\n\n";
+
+	  			      cin>>p;
+	  		  cout<<" _________________________________________________\n";
+	  		    	if(p==0){
+	  		    		cout<<"\t\t\tThank you !\n";
+							return 0;
+						}
+	  		    	else{}
+       break;
+       case 6:
+                x.update();
+                cout<<"\n\t\t\tPress (0) Exit \n"
+	  			  <<"\t\t\tPress (1) Return\n\n";
+
+	  			      cin>>p;
+	  		  cout<<" _________________________________________________\n";
+	  		    	if(p==0){
+	  		    		cout<<"\t\t\tThank you !\n";
+							return 0;
+						}
+	  		    	else{}
+       break;
+    case 0:
+              cout<<"$$$$$$$$$$$$$$$$$$$ EXIT $$$$$$$$$$$$$$$$$$$$$$$"<<endl;
+         return 0;
+         break;
+
+    default:
+              cout<<"/t/t/t!!!!!!error!!!!!!!"<<endl;
+    }
+    }
+    while(y!=0);}else if(f==1)
+    {
+    do
+    {
      cout<<"\n\t\t===============SuperMarket================\n\n"<<endl;
      cout<<"\t\t\tMAIN MENU\n\n"<<endl;
      cout<<"\t\t\t 1-Show all items\n\n"<<endl;
-     cout<<"\t\t\t 2-Add new item\n\n"<<endl;
-     cout<<"\t\t\t 3-Search for item\n\n"<<endl;
-     cout<<"\t\t\t 4-Delete item\n\n"<<endl;
-     cout<<"\t\t\t 5-Copy file\n\n"<<endl;
-     cout<<"\t\t\t 6-File length\n\n"<<endl;
-     cout<<"\t\t\t 7-Streamstste\n\n"<<endl;
-     cout<<"\t\t\t 9-Update record\n\n"<<endl;
-     cout<<"\t\t\t 8-exit\n\n"<<endl;
+     cout<<"\t\t\t 2-Search for item\n\n"<<endl;
+     cout<<"\t\t\t 3- Order\n\n"<<endl;
+     cout<<"\t\t\t 0-exit\n\n"<<endl;
+     cout<<"\t\t\t**chosse from ((0 to 3)**\n\n"<<endl;
      cin>>y;
-    switch(y){
-           case 1:
-           x.readrecord();
-           break;
-           case 2:
-           x.writerecord();
-           break;
-           case 3:
-           x.searchitem();
-           break;
-           case 8:
-           cout<<"$$$$$$$$$$$$$$$$$$$ EXIT $$$$$$$$$$$$$$$$$$$$$$$"<<endl;
-           break;
-           case 4:
-           x.readrecord();
-           x.delrcord();
-           cout<<"after deletion"<<endl;
-           x.readrecord();
-           break;
-           case 5:
-           x.copyfile();
-           break;
-           case 6:
-           x.filelength();
-           break;
-           case 7:
-           x.streamstate();
-           break;
-           case 9:
-           x.readrecord();
-           x.update();
-           x.readrecord();
-           break;
-        default:
-        cout<<"\t\t\t!!!!!!error!!!!!!!"<<endl;
-        exit(0);
-    }
-    }while(y!=8);
+    switch(y)
+    {
+    case 1:
+              x.show_items();
+              cout<<"\n\t\t\tPress (0) Exit \n"
+	  			  <<"\t\t\tPress (1) Return\n\n";
 
-    return 0;
-//hi
-}
+	  			      cin>>p;
+	  		  cout<<" _________________________________________________\n";
+	  		    	if(p==0){
+	  		    		cout<<"\t\t\tThank you !\n";
+							return 0;
+						}
+	  		    	else{}
+        break;
+
+    case 2:
+              x.searchitem();
+                           cout<<"\n\t\t\tPress (0) Exit\n"
+	  			           <<"\t\t\tPress (1) Return\n\n";
+
+                            cin>>p;
+	  		  cout<<" _________________________________________________\n";
+	  		    	if(p==0){
+	  		    		cout<<"\t\t\tThank you !\n";
+							return 0;
+						}
+	  		    	else{}
+
+        break;
+
+    case 3:
+              x.order();
+              cout<<"\n\t\t\tPress (0) Exit \n"
+	  			  <<"\t\t\tPress (1) Return\n\n";
+
+	  			      cin>>p;
+	  		  cout<<" _________________________________________________\n";
+	  		    	if(p==0){
+	  		    		cout<<"\t\t\tThank you !\n";
+							return 0;
+						}
+	  		    	else{}
+        break;
+
+    case 0:
+              cout<<"$$$$$$$$$$$$$$$$$$$ EXIT $$$$$$$$$$$$$$$$$$$$$$$"<<endl;
+              return 0;
+         break;
+    default:
+              cout<<"/t/t/t!!!!!!error!!!!!!!"<<endl;
+    }
+    }
+    while(y!=4);}
+    return 0;}
