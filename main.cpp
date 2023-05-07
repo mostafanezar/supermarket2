@@ -51,7 +51,8 @@ void add_items() {
         cin >> s.price;
         cout << "\n\n\t\tEnter expiry date: ";
         cin >> s.expirydate;
-
+        cout << "\n\n\t\tEnter id: ";
+        cin >> s.id;
         out.write((char*)&s, sizeof(s));
         cout << "\n\n\t\tProduct added successfully.\n";
 
@@ -136,7 +137,7 @@ void show_items()           // to view products in the super market (Read fun).
       {     do
 
       {
-      cout<<"\tproduct Name\t\tmobile phone\ttotal number product\n\n"<<endl;
+      cout<<"\tproduct Name\t\tmobile phone\tQuantity\n\n"<<endl;
             while(!in.eof())
             {
             in.read((char*)&b,sizeof(b));
@@ -231,7 +232,7 @@ void order(){
 		cin>>b.name;
 		cout<<" mobile phone : ";
 		cin>>b.phone;
-		cout<<" total number product  : ";
+		cout<<" Quantity  : ";
 		cin>>b.num_product;
 		f1.write((char*)&b,sizeof(b));
 		cout<<" _________________________________________________\n";
@@ -251,11 +252,11 @@ void order(){
         {
             cout<<"\n\tReservation sucessful \n";
 		   	cout<<"\n\tName : "<<b.name
-		   	<<"\n\tNumber phone : "<<b.phone
-		   	<<"\n\tproduct code : "<<s.id
-		   	<<"\n\tproduct Name : "<<s.productname
-		   	<<"\n\tThe  Price of "<< s.productname<<" : " <<s.price
-		   	<<"\n\tTotal order : "<<b.num_product
+		   	<<"\n\t Number phone : "<<b.phone
+		   	<<"\n\t product code : "<<s.id
+		   	<<"\n\t product Name : "<<s.productname
+		   	<<"\n\t product price :"<<s.price<<" EGP"
+		   	<<"\n\t Quantity: "<<b.num_product
 		   	<<"\n\tTotal price : "<<(s.price)*(b.num_product)<<" EGP"<<"\n";
 				cout<<"____________________________________________________\n";
 		  	   flag=1;
@@ -298,7 +299,7 @@ int main()
     cout<<"\t\t\t 5-delete\n\n"<<endl;
     cout<<"\t\t\t 6-update\n\n"<<endl;
     cout<<"\t\t\t 0-exit\n\n"<<endl;
-    cout<<"\t\t\t**chosse from ((0 to 5)**\n\n"<<endl;
+    cout<<"\t\t\t**chosse from ((0 to 6)**\n\n"<<endl;
     cin>>y;
     switch(y){
     case 1:
